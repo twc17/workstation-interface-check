@@ -24,7 +24,13 @@ import netmiko
 LOG_FILE = "workstation-interface-check.log"
 
 # List of items that we want in each port config
-BASE_CONFIG = ['description', 'source template', 'etc..']
+BASE_CONFIG = [
+        'description',
+        'switchport access vlan',
+        'switchport port-security maximum',
+        'no logging event link status',
+        'source template',
+        'spanning-tree portfast']
 
 def write_log(entry):
     """Write an entry to the log file"""
