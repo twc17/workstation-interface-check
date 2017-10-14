@@ -56,7 +56,24 @@ def get_workstation_interfaces(ssh):
     Returns:
         interfaces -- list of interaces in workstaion VLANs
     """
-    pass
+    # Command that we will run on the switch to get workstation vlans
+    cmd = "sh vl br | i (W-I|WKSTN|WKST)"
+    result = ssh.find_prompt() + "\n"
+    # Send command to switch and get the output
+    result += ssh.send_command_expect(cmd)
+
+    # Split the output by white spaces
+    output = result.split()
+
+    interfaces = []
+
+    for i in output:
+        # All of the interfaces start with 'Gi', so that's what we're looking for
+        if i.find("Gi") is not -1:
+            # Remove the comma from the port
+            interfaces.append(i.replace(',', ''))
+
+    return interfaces
 
 def get_interface_configs(interfaces, ssh):
     """Get the running config for a list of interfaces
