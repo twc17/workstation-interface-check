@@ -155,6 +155,21 @@ def main():
                 # Connect to the switch
                 ssh.enable()
 
+                switch_interface_results = open(switch + ".csv", 'w')
+
+                # Get a list of all interfaces in workstation VLANs
+                interfaces = get_workstation_interfaces(ssh)
+
+                # Running configs for interfaces
+                configs = get_interface_configs(interfaces, ssh)
+
+                for interface in configs.keys():
+                    if check_interface_config(configs[interface]):
+                        # YES!
+                        pass
+                    else:
+                        # NO!
+
                 # We're done with this switch, disconnect
                 ssh.disconnect()
 
