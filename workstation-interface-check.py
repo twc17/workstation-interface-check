@@ -137,6 +137,7 @@ def main():
         switch_list.append(switch.strip())
     f.close()
 
+    # Loop through each switch in the list
     for switch in switch_list:
         write_log("Current switch: " + switch)
 
