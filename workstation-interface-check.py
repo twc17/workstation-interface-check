@@ -24,6 +24,10 @@ import argparse
 # We will write all of our output to this file, just in case
 LOG_FILE = "workstation-interface-check.log"
 
+# Username and pass to connect to switch
+USER = 'uhm'
+SECRET_STRING = 'None yet'
+
 # List of items that we want in each port config
 BASE_CONFIG = [
         'description',
@@ -125,8 +129,41 @@ def main():
     parser.add_argument('input_switch_list', metavar='SWITCH_LIST', help='List of switches to check')
     args = parser.parse_args()
 
-    switch_list = open(args.input_switch_list, 'r') 
-    pass
+    switch_list = []
+
+    # Open the file containing the switches and add them to our switch_list
+    f = open(args.input_switch_list, 'r')
+    for switch in f:
+        switch_list.append(switch.strip())
+    f.close()
+
+    for switch in switch_list:
+        write_log("Current switch: " + switch)
+
+        # Make sure that the switch hostname resolves
+        if check_host(switch):
+            # Try to build the ssh object, connect to it, and do the rest of the program
+            try:
+                # Build the ssh object
+                ssh = netmiko.ConnectHandler(
+                        device_type = 'cisco_ios',
+                        ip = switch,
+                        username = USER,
+                        password = SECRET_STRING)
+                
+                # Connect to the switch
+                ssh.enable()
+
+                # We're done with this switch, disconnect
+                ssh.disconnect()
+
+            # Something went wrong connecting to the switch, log it
+            except:
+                write_log("ERROR: Unexpected exception with " + switch)
+
+        # If the switch hostname doesn't resolve, write that to the log
+        else:
+            write_log("ERROR: Check hostname for " + switch)
 
 # Run the program!
 if __name__ == "__main__":
