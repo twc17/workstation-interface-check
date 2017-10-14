@@ -85,7 +85,21 @@ def get_interface_configs(interfaces, ssh):
     Returns:
         configs -- dictionary of interfaces configs (configs[Gi1/0/1] = ['description xxx', 'other configs'])
     """
-    pass
+    # Dictionary that we will use for interface configs
+    configs = {}
+    
+    # Command that will be used to get running config of interface
+    # Note the trailing space... we need this
+    cmd = "sh run int "
+
+    for i in interfaces:
+        result = ssh.find_prompt() + "\n"
+        result += ssh.send_command_expect(cmd + i)
+        result = result.split()
+
+        configs[i] = result
+    
+    return configs
 
 def check_interface_config(interface):
     """Compare the given interfaces config to the BASE_CONFIG
