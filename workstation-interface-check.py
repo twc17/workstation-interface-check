@@ -121,7 +121,11 @@ def check_interface_config(interface):
     Returns:
         True if the interface is configured correctly, False otherwise
     """
-    pass
+    for config_item in BASE_CONFIG:
+        if interface.find(config_item) is -1:
+            return False
+
+    return True
 
 def main():
     """Main program logic"""
