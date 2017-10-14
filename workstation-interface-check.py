@@ -19,6 +19,7 @@ import os
 import sys
 import socket
 import netmiko
+import argparse
 
 # We will write all of our output to this file, just in case
 LOG_FILE = "workstation-interface-check.log"
@@ -120,6 +121,11 @@ def check_interface_config(interface):
 
 def main():
     """Main program logic"""
+    parser = argparse.ArgumentParser(description='Make sure workstation interfaces are configured correctly')
+    parser.add_argument('input_switch_list', metavar='SWITCH_LIST', help='List of switches to check')
+    args = parser.parse_args()
+
+    switch_list = open(args.input_switch_list, 'r') 
     pass
 
 # Run the program!
