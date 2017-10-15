@@ -3,7 +3,7 @@
 # Title: workstaion-interface-check.py
 # Author: Troy W. Caro <twc17@pitt.edu>
 # Version: 1.0.0
-# Last Modified: <10/14/2017>
+# Last Modified: <10/15/2017>
 #
 # Purpose: To check all interfaces that are in workstaion VLANs for correct configuration
 #
@@ -159,6 +159,7 @@ def main():
                 # Connect to the switch
                 ssh.enable()
 
+                # For each switch that we are testing, make a CSV file for results
                 switch_interface_results = open(switch + ".csv", 'w')
 
                 # Get a list of all interfaces in workstation VLANs
