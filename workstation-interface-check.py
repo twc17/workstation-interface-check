@@ -12,7 +12,7 @@
 #   netmiko module
 #
 # Usage:
-#  python3 workstation-interface-check.py SWITCH_LIST.txt 
+#  python3 workstation-interface-check.py [-h] SWITCH_LIST.txt 
 
 # External libraries
 import os
