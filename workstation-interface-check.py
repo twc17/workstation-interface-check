@@ -167,12 +167,14 @@ def main():
                 # Running configs for interfaces
                 configs = get_interface_configs(interfaces, ssh)
 
+                # Go over each interface, and make sure that it's configured correctly
                 for interface in configs.keys():
                     if check_interface_config(configs[interface]):
                         # YES!
-                        pass
+                        switch_interface_results.write(switch + "," + interface + ",Y")
                     else:
                         # NO!
+                        switch_interface_results.write(switch + "," + interface + ",N")
 
                 # We're done with this switch, disconnect
                 ssh.disconnect()
