@@ -14,7 +14,7 @@
 # Usage:
 #  python3 workstation-interface-check.py [-h] SWITCH_LIST.txt 
 #
-# TODO: Add interface VLAN ID, and VOIP template name to output
+# TODO: Full test and review
 
 # External libraries
 import os
@@ -22,13 +22,14 @@ import sys
 import socket
 import netmiko
 import argparse
+import datetime
 
 # We will write all of our output to this file, just in case
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
 USER = '****'
-SECRET_STRING = '*****'
+SECRET_STRING = '******'
 
 # List of items that we want in each port config
 BASE_CONFIG = [
@@ -42,7 +43,9 @@ BASE_CONFIG = [
 def write_log(entry):
     """Write an entry to the log file"""
     f = open(LOG_FILE, 'a')
-    f.write(entry + '\n')
+    # Format the time 2013-09-18 11:16:32
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    f.write(now + " " + entry + '\n')
     f.close()
 
 def check_host(host):
@@ -114,6 +117,28 @@ def get_interface_configs(interfaces, ssh):
     
     return configs
 
+def get_id_and_template(interface):
+    """Get the VLAN ID and VoIP template name from an interface config
+
+    Arguments:
+        interface -- list of configurations for an interface
+
+    Returns:
+        vlan -- VLAN ID
+        template -- VoIP template name
+    """
+    vlan = 'x'
+    template = 'x'
+
+    for item in interface:
+        if item.find(BASE_CONFIG[1]) is not -1:
+            vlan = item.split()[-1]
+
+        if item.find(BASE_CONFIG[4]) is not -1:
+            template = item.split()[-1]
+
+    return vlan, template
+
 def check_interface_config(interface):
     """Compare the given interfaces config to the BASE_CONFIG
 
@@ -150,7 +175,7 @@ def main():
         # Make sure that the switch hostname resolves
         if check_host(switch):
             # Try to build the ssh object, connect to it, and do the rest of the program
-            #try:
+            try:
                 # Build the ssh object
                 ssh = netmiko.ConnectHandler(
                         device_type = 'cisco_ios',
@@ -172,19 +197,20 @@ def main():
 
                 # Go over each interface, and make sure that it's configured correctly
                 for interface in configs.keys():
+                    vlan, template = get_id_and_template(configs[interface])
                     if check_interface_config(configs[interface]):
                         # YES!
-                        switch_interface_results.write(switch + "," + interface + ",Y" + "\n")
+                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + template + ",Y" + "\n")
                     else:
                         # NO!
-                        switch_interface_results.write(switch + "," + interface + ",N" + "\n")
+                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + template + ",N" + "\n")
 
                 # We're done with this switch, disconnect
                 ssh.disconnect()
 
             # Something went wrong connecting to the switch, log it
-            #except:
-                #write_log("ERROR: Unexpected exception with " + switch)
+            except:
+                write_log("ERROR: Unexpected exception with " + switch)
 
         # If the switch hostname doesn't resolve, write that to the log
         else:
