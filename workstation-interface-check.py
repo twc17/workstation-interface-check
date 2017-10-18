@@ -2,7 +2,7 @@
 
 # Title: workstaion-interface-check.py
 # Author: Troy W. Caro <twc17@pitt.edu>
-# Version: 1.0.0
+# Version: 1.1.0
 # Last Modified: <10/18/2017>
 #
 # Purpose: To check all interfaces that are in workstaion VLANs for correct configuration
@@ -28,7 +28,7 @@ import datetime
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '*****'
+USER = '****'
 SECRET_STRING = '*******'
 
 # List of items that we want in each port config
@@ -148,8 +148,13 @@ def check_interface_config(interface):
         True if the interface is configured correctly, False otherwise
     """
     for config_item in BASE_CONFIG:
+        # If any of the things from BASE_CONFIG are missing, fail compliance
         if any(config_item in item for item in interface) == False:
             return False
+
+    # If 'speed' or 'duplex' is in the interface config, fail compliance
+    if any('speed' in item for item in interface) or any('duplex' in item for item in interface):
+        return False
 
     return True
 
@@ -166,6 +171,8 @@ def main():
     for switch in f:
         switch_list.append(switch.strip())
     f.close()
+
+    switch_interface_results = open("workstation-interface-compliance.csv", 'w')
 
     # Loop through each switch in the list
     for switch in switch_list:
@@ -184,9 +191,6 @@ def main():
                 
                 # Connect to the switch
                 ssh.enable()
-
-                # For each switch that we are testing, make a CSV file for results
-                switch_interface_results = open(switch + ".csv", 'w')
 
                 # Get a list of all interfaces in workstation VLANs
                 interfaces = get_workstation_interfaces(ssh)
