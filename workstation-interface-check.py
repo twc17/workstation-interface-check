@@ -25,8 +25,8 @@ import argparse
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = 'uhm'
-SECRET_STRING = 'None yet'
+USER = '*****'
+SECRET_STRING = '*****'
 
 # List of items that we want in each port config
 BASE_CONFIG = [
@@ -106,7 +106,7 @@ def get_interface_configs(interfaces, ssh):
     for i in interfaces:
         result = ssh.find_prompt() + "\n"
         result += ssh.send_command_expect(cmd + i)
-        result = result.split()
+        result = result.split('\n')
 
         configs[i] = result
     
@@ -122,7 +122,7 @@ def check_interface_config(interface):
         True if the interface is configured correctly, False otherwise
     """
     for config_item in BASE_CONFIG:
-        if interface.find(config_item) is -1:
+        if any(config_item in item for item in interface) == False:
             return False
 
     return True
@@ -148,7 +148,7 @@ def main():
         # Make sure that the switch hostname resolves
         if check_host(switch):
             # Try to build the ssh object, connect to it, and do the rest of the program
-            try:
+            #try:
                 # Build the ssh object
                 ssh = netmiko.ConnectHandler(
                         device_type = 'cisco_ios',
@@ -172,17 +172,17 @@ def main():
                 for interface in configs.keys():
                     if check_interface_config(configs[interface]):
                         # YES!
-                        switch_interface_results.write(switch + "," + interface + ",Y")
+                        switch_interface_results.write(switch + "," + interface + ",Y" + "\n")
                     else:
                         # NO!
-                        switch_interface_results.write(switch + "," + interface + ",N")
+                        switch_interface_results.write(switch + "," + interface + ",N" + "\n")
 
                 # We're done with this switch, disconnect
                 ssh.disconnect()
 
             # Something went wrong connecting to the switch, log it
-            except:
-                write_log("ERROR: Unexpected exception with " + switch)
+            #except:
+                #write_log("ERROR: Unexpected exception with " + switch)
 
         # If the switch hostname doesn't resolve, write that to the log
         else:
