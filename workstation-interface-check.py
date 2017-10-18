@@ -28,12 +28,11 @@ import datetime
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '****'
-SECRET_STRING = '******'
+USER = '*****'
+SECRET_STRING = '*******'
 
 # List of items that we want in each port config
 BASE_CONFIG = [
-        'description',
         'switchport access vlan',
         'switchport port-security maximum',
         'no logging event link-status',
@@ -131,10 +130,10 @@ def get_id_and_template(interface):
     template = 'x'
 
     for item in interface:
-        if item.find(BASE_CONFIG[1]) is not -1:
+        if item.find(BASE_CONFIG[0]) is not -1:
             vlan = item.split()[-1]
 
-        if item.find(BASE_CONFIG[4]) is not -1:
+        if item.find(BASE_CONFIG[3]) is not -1:
             template = item.split()[-1]
 
     return vlan, template
