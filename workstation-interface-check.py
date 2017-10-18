@@ -3,7 +3,7 @@
 # Title: workstaion-interface-check.py
 # Author: Troy W. Caro <twc17@pitt.edu>
 # Version: 1.0.0
-# Last Modified: <10/15/2017>
+# Last Modified: <10/18/2017>
 #
 # Purpose: To check all interfaces that are in workstaion VLANs for correct configuration
 #
@@ -13,6 +13,8 @@
 #
 # Usage:
 #  python3 workstation-interface-check.py [-h] SWITCH_LIST.txt 
+#
+# TODO: Add interface VLAN ID, and VOIP template name to output
 
 # External libraries
 import os
@@ -25,7 +27,7 @@ import argparse
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '*****'
+USER = '****'
 SECRET_STRING = '*****'
 
 # List of items that we want in each port config
@@ -33,7 +35,7 @@ BASE_CONFIG = [
         'description',
         'switchport access vlan',
         'switchport port-security maximum',
-        'no logging event link status',
+        'no logging event link-status',
         'source template',
         'spanning-tree portfast']
 
