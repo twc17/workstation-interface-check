@@ -28,8 +28,8 @@ import datetime
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '*****'
-SECRET_STRING = '******'
+USER = '****'
+SECRET_STRING = '*******'
 
 # List of items that we want in each port config
 BASE_CONFIG = [
@@ -172,6 +172,8 @@ def main():
         switch_list.append(switch.strip())
     f.close()
 
+    switch_interface_results = open("workstation-interface-compliance.csv", 'w')
+
     # Loop through each switch in the list
     for switch in switch_list:
         write_log("Current switch: " + switch)
@@ -189,9 +191,6 @@ def main():
                 
                 # Connect to the switch
                 ssh.enable()
-
-                # For each switch that we are testing, make a CSV file for results
-                switch_interface_results = open(switch + ".csv", 'w')
 
                 # Get a list of all interfaces in workstation VLANs
                 interfaces = get_workstation_interfaces(ssh)
