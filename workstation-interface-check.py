@@ -73,6 +73,7 @@ def get_workstation_interfaces(ssh):
 
     Returns:
         interfaces -- list of interaces in workstaion VLANs
+        vlans -- dictionary of VLAN IDs and names vlans[id] = name
     """
     # Command that we will run on the switch to get workstation vlans
     cmd = "sh vl br | i (W-I|WKSTN|WKST)"
@@ -84,14 +85,18 @@ def get_workstation_interfaces(ssh):
     output = result.split()
 
     interfaces = []
+    vlans = {}
 
-    for i in output:
+    for i in range(len(output)):
         # All of the interfaces start with 'Gi', so that's what we're looking for
-        if i.find("Gi") is not -1:
+        if output[i].find("Gi") is not -1:
             # Remove the comma from the port
-            interfaces.append(i.replace(',', ''))
+            interfaces.append(output[i].replace(',', ''))
 
-    return interfaces
+        if output[i].isdigit():
+            vlans[output[i]] = output[i+1]
+
+    return interfaces, vlans
 
 def get_interface_configs(interfaces, ssh):
     """Get the running config for a list of interfaces
@@ -196,7 +201,7 @@ def main():
                 ssh.enable()
 
                 # Get a list of all interfaces in workstation VLANs
-                interfaces = get_workstation_interfaces(ssh)
+                interfaces, vlan_names = get_workstation_interfaces(ssh)
 
                 # If there are no workstation interfaces, skip the switch
                 if len(interfaces) == 0:
@@ -211,10 +216,10 @@ def main():
                     vlan, template = get_id_and_template(configs[interface])
                     if check_interface_config(configs[interface]):
                         # YES!
-                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + template + ",Y" + "\n")
+                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + vlan_names[vlan] + "," + template + ",Y" + "\n")
                     else:
                         # NO!
-                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + template + ",N" + "\n")
+                        switch_interface_results.write(switch + "," + interface + "," + vlan + "," + vlan_names[vlan] + "," + template + ",N" + "\n")
 
                 # We're done with this switch, disconnect
                 ssh.disconnect()
