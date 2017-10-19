@@ -31,7 +31,7 @@ from text_mailer import send_mail
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '****'
+USER = '*****'
 SECRET_STRING = '*******'
 
 # List of items that we want in each port config
@@ -181,6 +181,7 @@ def main():
     f.close()
 
     switch_interface_results = open("workstation-interface-compliance.csv", 'w')
+    switch_interface_results.write("SWITCH_NAME,INTERFACE,VLAN ID,VLAN_NAME,VOICE_TEMPLATE,INTERFACE_COMPLIANCE_CHECK\n")
 
     # Loop through each switch in the list
     for switch in switch_list:
