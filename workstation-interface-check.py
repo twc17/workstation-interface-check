@@ -24,6 +24,9 @@ import netmiko
 import argparse
 import datetime
 
+# Library to send attachment
+from text_mailer import send_mail
+
 # We will write all of our output to this file, just in case
 LOG_FILE = "workstation-interface-check.log"
 
@@ -223,6 +226,8 @@ def main():
         # If the switch hostname doesn't resolve, write that to the log
         else:
             write_log("ERROR: Check hostname for " + switch)
+
+    send_mail("twc17@pitt.edu", "workstation-compliance@pitt.edu", "Workstation Compliance Check", "Body here", "workstation-interface-compliance.csv")
 
 # Run the program!
 if __name__ == "__main__":
