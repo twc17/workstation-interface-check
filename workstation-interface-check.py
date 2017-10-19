@@ -195,6 +195,10 @@ def main():
                 # Get a list of all interfaces in workstation VLANs
                 interfaces = get_workstation_interfaces(ssh)
 
+                # If there are no workstation interfaces, skip the switch
+                if len(interfaces) == 0:
+                    continue
+
                 # Running configs for interfaces
                 configs = get_interface_configs(interfaces, ssh)
 
