@@ -3,7 +3,7 @@
 # Title: workstaion-interface-check.py
 # Author: Troy W. Caro <twc17@pitt.edu>
 # Version: 1.1.0
-# Last Modified: <10/19/2017>
+# Last Modified: <10/27/2017>
 #
 # Purpose: To check all interfaces that are in workstaion VLANs for correct configuration
 #
@@ -31,8 +31,9 @@ from text_mailer import send_mail
 LOG_FILE = "workstation-interface-check.log"
 
 # Username and pass to connect to switch
-USER = '*****'
-SECRET_STRING = '*******'
+with open("credentials.txt", "r") as f:
+    USER = f.readline().strip()
+    SECRET_STRING = f.readline().strip()
 
 # List of items that we want in each port config
 BASE_CONFIG = [
