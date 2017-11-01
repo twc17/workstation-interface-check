@@ -77,7 +77,7 @@ def get_workstation_interfaces(ssh):
         vlans -- dictionary of VLAN IDs and names vlans[id] = name
     """
     # Command that we will run on the switch to get workstation vlans
-    cmd = "sh vl br | i (W-I|WKSTN|WKST)"
+    cmd = "sh vl br | i (W-I|WKSTN|WKST|WKS)"
     result = ssh.find_prompt() + "\n"
     # Send command to switch and get the output
     result += ssh.send_command_expect(cmd)
