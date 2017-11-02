@@ -207,7 +207,7 @@ def main():
 
                 # If there are no workstation interfaces, skip the switch
                 if len(interfaces) == 0:
-                    write_log("ERROR: No workstation VLANs, skipping" + switch)
+                    write_log("ERROR: No workstation VLANs, skipping " + switch)
                     continue
 
                 # Running configs for interfaces
