@@ -52,6 +52,11 @@ with open(arguments['<interface_list>'], 'r') as f:
 # Log file in current dir: modify_interfaes_SWITCH.log
 LOG_FILE = 'modify_interfaces_{}.log'.format(SWITCH_NAME)
 
+# Credentials to log into switches
+with open('credentials.txt', 'r') as f:
+    USER = f.readline().strip()
+    SECRET = f.readline().strip()
+
 #################################################################################
 
 def write_log(entry):
@@ -115,7 +120,7 @@ def configure_interface(config_list, description, vlan, maximum, ssh):
     Arguments:
         config_list -- list of new interface configurations
         description -- description to apply to the interface
-        vlans -- access vlan that the interface should be in
+        vlan -- access vlan that the interface should be in
         maximum -- max mac allowance interface should have
         ssh -- connection to the switch
 
@@ -127,7 +132,35 @@ def configure_interface(config_list, description, vlan, maximum, ssh):
 #################################################################################
 
 def main():
-    pass
+    if check_host(SWITCH_NAME):
+        write_log('Current switch: {} \n'.format(SWITCH_NAME))
+
+        try:
+            ssh = netmiko.ConnectHandler(
+                    device_type = 'cisco_ios',
+                    ip = SWITCH_NAME,
+                    username = USER,
+                    password = SECRET)
+
+            # Connect to the switch
+            ssh.enable()
+
+            # Go over each interface in the list
+            for interface in INTERFACE_LIST:
+                # Get the current interfaces running config
+                running_config = get_interface_config(interface, ssh)
+                # From the current config, grab the description, vlan, and maximum MAC
+                description, vlan, maximum = persistent_interface_data(running_config)
+                # Configure the interface with the new config, saving the old description, vlan,
+                # and adding 1 to the max
+                result = configure_interface(INTERFACE_CONFIG, description, vlan, (maximum + 1), ssh)
+
+        except:
+            write_log('ERROR: Unexpected exception with {} \n'.format(SWITCH_NAME))
+
+    else:
+        write_log('ERROR: Check hostname for {} \n'.format(SWITCH_NAME))
+        sys.exit(0)
 
 #################################################################################
 
