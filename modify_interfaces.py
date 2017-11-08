@@ -112,13 +112,26 @@ def persistent_interface_data(interface_config):
         vlan -- interface access vlan
         maximum -- max mac allowance
     """
-    pass
+    description = ''
+    vlan = 1
+    maximum = 1
 
-def configure_interface(config_list, description, vlan, maximum, ssh):
+    for item in interface_config:
+        if item.find('description') is not -1:
+            description = item
+        if item.find('vlan') is not -1:
+            vlan = item.split()[-1]
+        if item.find('maximum') is not -1:
+            maximum = item.split()[-1]
+
+    return description, vlan, maximum
+
+def configure_interface(config_list, interface, description, vlan, maximum, ssh):
     """Default the interface, the reconfigure it with the given config_list
 
     Arguments:
         config_list -- list of new interface configurations
+        interface -- interface to configure
         description -- description to apply to the interface
         vlan -- access vlan that the interface should be in
         maximum -- max mac allowance interface should have
@@ -127,7 +140,20 @@ def configure_interface(config_list, description, vlan, maximum, ssh):
     Returns:
         result -- commands sent to the switch
     """
-    pass
+    # Add interface command to top of the list
+    config_list.insert(0,interface)
+
+    # If there was a description set on the interface, keep in
+    if len(description) > 1:
+        config_list.append('{}'.format(description))
+    
+    # Keep VLAN from previous config
+    config_list.append('switchport access vlan {}'.format(vlan))
+
+    # Keep maximum MAC allowance (+1 should have alread been added to it in main() )
+    config_list.append('switchport port-security maximum {}'.format(maximum))
+
+    return ssh.send_config_set(config_list)
 
 #################################################################################
 
@@ -153,7 +179,7 @@ def main():
                 description, vlan, maximum = persistent_interface_data(running_config)
                 # Configure the interface with the new config, saving the old description, vlan,
                 # and adding 1 to the max
-                result = configure_interface(INTERFACE_CONFIG, description, vlan, (maximum + 1), ssh)
+                result = configure_interface(INTERFACE_CONFIG, interface, description, vlan, (maximum + 1), ssh)
 
         except:
             write_log('ERROR: Unexpected exception with {} \n'.format(SWITCH_NAME))
