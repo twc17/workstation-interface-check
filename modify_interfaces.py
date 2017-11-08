@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 '''modify_interfaces.py
 Usage:
-    modify_interfaces.py <switch_name> <interface_config> <interface_list>
+    modify_interfaces.py <switch_name> <interface_config> <interface_list> [-p | --pretend]
     modify_interfaces.py (-h | --help)
     modify_interfaces.py (-v | --version)
 
@@ -11,6 +11,7 @@ Positional Arguments:
     <interface_list>        List of interfaces to modify
 
 Options:
+    -p --pretend            Run program in PRETEND mode. Will not make changes to switch
     -h --help               Print this screen and exit
     -v --version            Print the version of modify_interfaces.py
 '''
@@ -38,6 +39,8 @@ import datetime
 arguments = docopt.docopt(__doc__, version='modify_interfaces.py version 1.0.0')
 
 SWITCH_NAME = arguments['<switch_name>']
+
+PRETEND = arguments['--pretend']
 
 INTERFACE_CONFIG = []
 # Open file containing interface configurations and add them to INTERFACE_CONFIG
@@ -141,7 +144,7 @@ def configure_interface(config_list, interface, description, vlan, maximum, ssh)
         result -- commands sent to the switch
     """
     # Add interface command to top of the list
-    config_list.insert(0,interface)
+    config_list.insert(0,'interface {}'.format(interface))
 
     # If there was a description set on the interface, keep in
     if len(description) > 1:
@@ -158,8 +161,15 @@ def configure_interface(config_list, interface, description, vlan, maximum, ssh)
 #################################################################################
 
 def main():
+    if PRETEND:
+        write_log('Starting script for {} in PRETEND mode'.format(SWITCH_NAME))
+        write_log('No changes will be made to the switch')
+    else:
+        write_log('Starting script for {} in LIVE mode'.format(SWITCH_NAME))
+        write_log('Changes will be made to the switch')
+
     if check_host(SWITCH_NAME):
-        write_log('Current switch: {} \n'.format(SWITCH_NAME))
+        write_log('nslookup passed for {}'.format(SWITCH_NAME))
 
         try:
             ssh = netmiko.ConnectHandler(
@@ -169,23 +179,49 @@ def main():
                     password = SECRET)
 
             # Connect to the switch
+            write_log('Establishing connection to {}'.format(SWITCH_NAME))
             ssh.enable()
 
             # Go over each interface in the list
             for interface in INTERFACE_LIST:
+
                 # Get the current interfaces running config
+                write_log('Getting running config for interface {}'.format(interface))
                 running_config = get_interface_config(interface, ssh)
+
                 # From the current config, grab the description, vlan, and maximum MAC
                 description, vlan, maximum = persistent_interface_data(running_config)
+                write_log('Saving description: {}, vlan: {}, max: {}, from interface {}'.format(description, vlan, maximum, interface))
+
                 # Configure the interface with the new config, saving the old description, vlan,
                 # and adding 1 to the max
-                result = configure_interface(INTERFACE_CONFIG, interface, description, vlan, (maximum + 1), ssh)
+                if PRETEND:
+                    write_log('The following commands would have been sent to the switch')
+                    write_log('interface {}'.format(interface))
+                    write_log(description)
+                    for item in INTERFACE_CONFIG:
+                        write_log(item)
+                    write_log('switchport access vlan {}'.format(vlan))
+                    write_log('switchport port-security maximum {}'.format(maximum))
+                else:
+                    # Commenting out for testing
+                    # write_log('Programming interface {} with new config'.format(interface))
+                    # result = configure_interface(INTERFACE_CONFIG, interface, description, vlan, (maximum + 1), ssh)
+                    print("NOT PRETENDING")
+
+            # Write config to memory
+            # Commenting out for testing
+            #write_log('Writing switch config to memory \n')
+            #ssh.send_command_expect('write memory')
+
+            # Disconnect
+            ssh.disconnect()
 
         except:
-            write_log('ERROR: Unexpected exception with {} \n'.format(SWITCH_NAME))
+            write_log('ERROR: Unexpected exception with {}'.format(SWITCH_NAME))
 
     else:
-        write_log('ERROR: Check hostname for {} \n'.format(SWITCH_NAME))
+        write_log('ERROR: nslookup failed for {}'.format(SWITCH_NAME))
         sys.exit(0)
 
 #################################################################################
