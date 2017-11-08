@@ -95,6 +95,35 @@ def get_interface_config(interface, ssh):
 
     return config
 
+def persistent_interface_data(interface_config):
+    """Get the data from the interface config that should remain the same
+    through this process. Description, VLAN, Max MAC (if any)
+
+    Arguments:
+        interface_config -- list of configs currently on an interface
+
+    Returns:
+        description --  interface description
+        vlan -- interface access vlan
+        maximum -- max mac allowance
+    """
+    pass
+
+def configure_interface(config_list, description, vlan, maximum, ssh):
+    """Default the interface, the reconfigure it with the given config_list
+
+    Arguments:
+        config_list -- list of new interface configurations
+        description -- description to apply to the interface
+        vlans -- access vlan that the interface should be in
+        maximum -- max mac allowance interface should have
+        ssh -- connection to the switch
+
+    Returns:
+        result -- commands sent to the switch
+    """
+    pass
+
 #################################################################################
 
 def main():
