@@ -32,12 +32,12 @@ import netmiko
 import datetime
 
 # Log file in current dir: modify_interfaes_DATETIME.log
-LOG_FILE = 'modify_interfaces_{}.log'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+LOG_FILE = 'modify_interfaces_{}.log'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))
 
 def write_log(entry):
     """Write an entry to the log file"""
     log = open(LOG_FILE, 'a')
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
     log.write('{} {}\n'.format(now, entry))
     log.close()
 
