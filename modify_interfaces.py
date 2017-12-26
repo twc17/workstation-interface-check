@@ -209,10 +209,10 @@ def main():
                     # result = configure_interface(INTERFACE_CONFIG, interface, description, vlan, (maximum + 1), ssh)
                     print("NOT PRETENDING")
 
-            # Write config to memory
-            # Commenting out for testing
-            #write_log('Writing switch config to memory \n')
-            #ssh.send_command_expect('write memory')
+                    # Write config to memory
+                    # Commenting out for testing
+                    #write_log('Writing switch config to memory \n')
+                    #ssh.send_command_expect('write memory')
 
             # Disconnect
             ssh.disconnect()
